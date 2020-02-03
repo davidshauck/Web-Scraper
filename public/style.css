@@ -1,0 +1,25 @@
+.card-header {
+    padding: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inherit;
+}
+
+.save-article, .delete-article, .get-notes {
+    float: right;
+    height: 40px;
+    margin: 0px 0px 0px 5px;
+}
+
+.card-text {
+    padding: 20px;
+    height: 75px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+h5 {
+    margin: 0px !important;
+    padding: 0px;
+}
