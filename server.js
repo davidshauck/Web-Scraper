@@ -4,6 +4,7 @@ let logger = require("morgan");
 let mongoose = require("mongoose");
 let axios = require("axios");
 let cheerio = require("cheerio");
+let mongojs = require("mongojs")
 
 // set port
 let PORT = 3000;
@@ -87,6 +88,21 @@ app.post("/api/save/:id", function(req, res) {
     });
 });
 
+// Route for grabbing a specific Article by id, update status to "false"
+app.post("/api/delete/:id", function(req, res) {
+  db.Article
+    .update(
+      { _id: req.params.id }, 
+      { $set: {saved: false}
+    })
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
+    });
+});
+
 // route for pulling up all saved articles
 app.get("/api/getsaved/", function(req, res) {
   // only get ones whose saved status is true
@@ -128,14 +144,14 @@ app.get("/articles/:id", function(req, res) {
 });
 
 // Route for saving/updating an Article's associated Note
-app.post("/articles/:id", function(req, res) {
+app.post("/api/savenotes/:id", function(req, res) {
 
   db.Note
     .create(req.body)
     .then(function(dbNote) {
-      return db.Article.findOneAndUpdate(
+      return db.Article.insert(
         { 
-          _id: req.params.id 
+          _id: mongojs.ObjectId(req.params.id) 
         }, 
         { 
           note: dbNote._id 
@@ -148,6 +164,23 @@ app.post("/articles/:id", function(req, res) {
     .catch(function(err) {
       res.json(err);
     });
+});
+
+// Retrieve appropriate notes from mongo
+app.get("/api/notes/:id", function(req, res) {
+  // Find all notes in the notes collection
+  db.Note.find({ _id: req.params.id }, function(error, found) {
+    console.log(found);
+    // Log any errors
+    if (error) {
+      console.log(error);
+    }
+    else {
+      // Otherwise, send json of the notes back to user
+      // This will fire off the success function of the ajax request
+      res.json(found);
+    }
+  });
 });
 
 

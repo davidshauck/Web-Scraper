@@ -3,7 +3,7 @@ let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
 let noteSchema = new Schema({
-  title: String,
+  // title: String,
   body: String
 });
 
