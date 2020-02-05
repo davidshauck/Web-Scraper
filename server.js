@@ -7,9 +7,8 @@ let cheerio = require("cheerio");
 require('dotenv').config()
 // let mongojs = require("mongojs")
 
+// variable for deploying to heroku, or if it's being run locally
 let MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoScraper";
-
-// mongodb://dave:hazel123@host:3000/mongoScraper
 
 // set port
 const PORT = process.env.PORT || 3000;
@@ -152,15 +151,15 @@ app.get("/articles/:id", function(req, res) {
 
 // Route for saving/updating an Article's associated Note
 app.post("/api/savenotes/", function(req, res) {
-  console.log("REQ BODY", req.body)
-
+  // set some variables to hold the stuff we ant
   const note = req.body.newNote;
   const id = req.body.articleId;
-
+  // create the note...
   db.Note.create({note})
+    // ... then return the note with the new mongoose Id
     .then(function(dbNote) {
-      // If a Note was created successfully, find one User (there's only one) and push the new Note's _id to the User's `notes` array
-      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
+      // If a Note was created successfully, find the right Article and push the new Note's _id to the Article's `notes` array
+      // { new: true } tells the query that we want it to return the updated Article -- it returns the original by default
       // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
       return db.Article.findOneAndUpdate(
         {_id: mongoose.Types.ObjectId(id)}, 
@@ -204,7 +203,6 @@ app.delete("/notes/delete/:id", function(req, res) {
     res.json(err);
   });
 });
-
 
 // Listen on port 3000
 app.listen(PORT, function() {
