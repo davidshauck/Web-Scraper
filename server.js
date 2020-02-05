@@ -4,15 +4,15 @@ let logger = require("morgan");
 let mongoose = require("mongoose");
 let axios = require("axios");
 let cheerio = require("cheerio");
+require('dotenv').config()
 // let mongojs = require("mongojs")
 
-let MONGODB_URI = "mongodb://dave:hazel123@host:3000/mongoScraper"
-|| "mongodb://localhost/mongoScraper";
+let MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoScraper";
 
 // mongodb://dave:hazel123@host:3000/mongoScraper
 
 // set port
-let PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // require all models
 let db = require("./models");
@@ -30,7 +30,7 @@ app.use(express.static("public"));
 
 // Connect to the Mongo DB
 // mongoose.connect("mongodb://localhost/mongoScraper", { useNewUrlParser: true });
-mongoose.connect(MONGODB_URI, { useUnifiedTopology: true });
+mongoose.connect(MONGODB_URI);
 
 // Main route 
 app.get("/", function(req, res) {
