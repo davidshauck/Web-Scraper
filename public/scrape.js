@@ -4,7 +4,7 @@ $(document).ready(function() {
 let data = [];
 // if there are no articles display a message
 if (data.length === 0) {
-    $(".articles").append("Click the scrape button to grab some stories");
+    $(".articles").append("<p>Click the scrape button to see some stories.</p>");
 };
 
 // click function for scraping
@@ -12,13 +12,15 @@ $(document).on("click", ".scrape-button", function (e) {
     e.preventDefault(e);
     // empty the div
     $(".articles").empty();
+    // insert loading gif
+    $(".articles").append("<p><img src='/loading.gif'></p>")
     // call the scrape function
     scrapeArticles();
 });
 
 // click function for clearing articles
 $(document).on("click", ".clear-button", function (e) {
-    $(".articles").empty().append("Click the scrape button to grab some stories");
+    $(".articles").empty().append("<p>Click the scrape button to see some stories.</p>");
 });
 
 // click function for showing notes
@@ -58,7 +60,7 @@ $(document).on("click", ".delete-article", deleteSavedArticle);
 function scrapeArticles() {
     // scrape route saves articles to database
     $.get("/api/scrape").then(function(data) {
-        // call the function that then grabs the saved articles
+        // call the function that then grabs just the saved articles
         loadDatabase();
     });
 
@@ -66,6 +68,8 @@ function scrapeArticles() {
 
 // function for loading non-saved articles
 function loadDatabase() {
+    // empty the div
+    $(".articles").empty();
     // Run an AJAX request for any unsaved headlines
     $.get("/api/articles?saved=false").then(function(data) {
       // If we have headlines, render them to the page
@@ -73,7 +77,7 @@ function loadDatabase() {
         renderArticles(data);
       } else {
         // Otherwise render a message explaining we have no saved articles
-        $(".articles").empty().append("You have no saved stories");
+        $(".articles").empty().append('<p>You have no saved articles. Click "Scrape Articles" to see some new headlines.<p>');
       }
     });
   }
@@ -119,7 +123,7 @@ function getSavedArticles() {
         renderSavedArticles(data);
       } else {
         // Otherwise render a message explaining we have no saved articles
-        $(".articles").empty().append("You have no saved articles");
+        $(".articles").empty().append('<p>You have no saved articles. Click "Scrape Articles" to see some new headlines.<p>');
       }
     });
   };
@@ -179,6 +183,7 @@ function saveArticle() {
     });
   }
 
+// function to deleted a saved article
 function deleteSavedArticle() {
     // set a variable for the article Id
     let articleId = $(this).attr("data-id");
@@ -193,8 +198,13 @@ function deleteSavedArticle() {
         // If the data was saved successfully
         if (data.saved) {
             console.log("saved")
-        }
+        };
     });
+    // check to see if div is empty
+    if ( $('.articles').children().length == 0 ) {
+        // if so display a mnessage
+        $(".articles").append('<p>You have no saved articles. Click "Scrape Articles" to see some new headlines.<p>');
+    };
 };
 
 // This function handles opening the notes modal and displaying our notes
