@@ -4,7 +4,7 @@ let logger = require("morgan");
 let mongoose = require("mongoose");
 let axios = require("axios");
 let cheerio = require("cheerio");
-let mongojs = require("mongojs")
+// let mongojs = require("mongojs")
 
 let MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoScraper";
 
@@ -26,7 +26,8 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/mongoScraper", { useNewUrlParser: true });
+// mongoose.connect("mongodb://localhost/mongoScraper", { useNewUrlParser: true });
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 // Main route 
 app.get("/", function(req, res) {
@@ -196,6 +197,8 @@ app.delete("/notes/delete/:id", function(req, res) {
       console.log(err);
       res.send(err);
     }
+  }).catch(function(err) {
+    res.json(err);
   });
 });
 

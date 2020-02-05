@@ -194,6 +194,10 @@ function deleteSavedArticle() {
         if (data.saved) {
             console.log("saved")
         }
+        if (!data || data.length === 0) {
+        $(".articles").empty().append("Click the scrape button to grab some stories");
+
+        }
     });
 };
 
