@@ -65,3 +65,7 @@ p {
     text-align: center;
     font-size: 24px;
 }
+
+.list-group-item {
+    height: 50px;
+}

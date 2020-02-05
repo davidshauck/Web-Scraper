@@ -25,9 +25,10 @@ $(document).on("click", ".clear-button", function (e) {
 
 // click function for showing notes
 $(document).on("click", ".get-notes", function (e) {
+    // empty all the modal divs
     $(".modal-title").empty();
     $(".modal-footer").empty();
-    $(".note").empty();
+    $("textarea.note").val("");
     $(".results").empty();
     let articleId;
     $(".modal").modal("show");
@@ -77,7 +78,7 @@ function loadDatabase() {
         renderArticles(data);
       } else {
         // Otherwise render a message explaining we have no saved articles
-        $(".articles").empty().append('<p>You have no saved articles. Click "Scrape Articles" to see some new headlines.<p>');
+        $(".articles").empty().append('<p>You have no saved articles. Click the scrape button to see some new headlines.<p>');
       }
     });
   }
@@ -123,7 +124,7 @@ function getSavedArticles() {
         renderSavedArticles(data);
       } else {
         // Otherwise render a message explaining we have no saved articles
-        $(".articles").empty().append('<p>You have no saved articles. Click "Scrape Articles" to see some new headlines.<p>');
+        $(".articles").empty().append('<p>You have no saved articles. Click the scrape button to see some new headlines.<p>');
       }
     });
   };
@@ -203,7 +204,7 @@ function deleteSavedArticle() {
     // check to see if div is empty
     if ( $('.articles').children().length == 0 ) {
         // if so display a mnessage
-        $(".articles").append('<p>You have no saved articles. Click "Scrape Articles" to see some new headlines.<p>');
+        $(".articles").append('<p>You have no saved articles. Click the scrape button to see some new headlines.<p>');
     };
 };
 
@@ -278,9 +279,9 @@ function saveNote() {
                 if (data.saved) {
                 console.log("saved")
                 };
-                // When complete, clear the divs and close the modal
-                $(".note").empty();
-                // hide the modal
+                // When complete, clear the div...
+                $(".note").val("");
+                // ... and hide the modal
                 $(".modal").modal("hide");
             });
         };
