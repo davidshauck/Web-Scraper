@@ -194,10 +194,6 @@ function deleteSavedArticle() {
         if (data.saved) {
             console.log("saved")
         }
-        if (!data || data.length === 0) {
-        $(".articles").empty().append("Click the scrape button to grab some stories");
-
-        }
     });
 };
 
@@ -234,8 +230,11 @@ function showNotes(articleId) {
 
         // click to delete a note
         $(".delete-note").on("click", function() {
-            var noteId = $(this).attr("data-note");
-  
+            // hide modal
+            $(".modal").modal("hide");
+            // set a variable for the note being deleted
+            let noteId = $(this).attr("data-note");
+            // send info to the server
             $.ajax({
                 method: "DELETE",
                 url: "/notes/delete/" + noteId
