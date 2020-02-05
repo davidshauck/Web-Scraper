@@ -6,8 +6,10 @@ let axios = require("axios");
 let cheerio = require("cheerio");
 // let mongojs = require("mongojs")
 
-let MONGODB_URI = "mongodb://heroku_rdrjqthq:3h9uqjij52e4c3f220pvsurd3c@ds033069.mlab.com:33069/heroku_rdrjqthq"
+let MONGODB_URI = "mongodb://dave:hazel123@host:3000/mongoScraper"
 || "mongodb://localhost/mongoScraper";
+
+// mongodb://dave:hazel123@host:3000/mongoScraper
 
 // set port
 let PORT = 3000;
