@@ -5,9 +5,9 @@ let data = [];
 // if there are no articles display a message
 if (data.length === 0) {
     $(".articles").append("Click the scrape button to grab some stories");
-}
+};
 
-// click for scraping
+// click function for scraping
 $(document).on("click", ".scrape-button", function (e) {
     e.preventDefault(e);
     // empty the div
@@ -16,12 +16,12 @@ $(document).on("click", ".scrape-button", function (e) {
     scrapeArticles();
 });
 
-// click for clearing articles
+// click function for clearing articles
 $(document).on("click", ".clear-button", function (e) {
     $(".articles").empty().append("Click the scrape button to grab some stories");
 });
 
-// click for showing notes
+// click function for showing notes
 $(document).on("click", ".get-notes", function (e) {
     $(".modal-title").empty();
     $(".modal-footer").empty();
@@ -29,26 +29,30 @@ $(document).on("click", ".get-notes", function (e) {
     $(".results").empty();
     let articleId;
     $(".modal").modal("show");
+    // grab the articleId from the "show notes" button
     articleId = $(this).attr("data-id");
+    // add id to title of modal
     $(".modal-title").append("Note for article " + articleId);
+    // create save button with bootstrap classes and local class
     let saveBtn = $("<button class='btn btn-success save-note'>Save Note</button>");
+    // add the articleId to the data attribute
     saveBtn.attr("data-id", articleId);
+    // append the note button to the modal
     $(".modal-footer").append(saveBtn);
     showNotes(articleId);
 });
 
+//Click function to save note
+$(document).on("click", ".save-note", saveNote);  
 
-
-//Click to save article
+//Click function to save article
 $(document).on("click", ".save-article", saveArticle);
 
-//Click to get saved articles
+//Click function to get saved articles
 $(document).on("click", ".saved-button", getSavedArticles);
 
-//Click to delete saved article
+//Click function to delete saved article
 $(document).on("click", ".delete-article", deleteSavedArticle);
-
-
 
 // function for scraping articles
 function scrapeArticles() {
@@ -60,15 +64,10 @@ function scrapeArticles() {
 
 }; // end scrapeArtices function
 
+// function for loading non-saved articles
 function loadDatabase() {
     // Run an AJAX request for any unsaved headlines
     $.get("/api/articles?saved=false").then(function(data) {
-
-        savedArticles = data;
-
-        console.log(data);
-        // debugger;
-    //   $(".articles").empty();
       // If we have headlines, render them to the page
       if (data && data.length) {
         renderArticles(data);
@@ -114,10 +113,6 @@ function renderArticles(data) {
 function getSavedArticles() {
     // Run an AJAX request for any unsaved headlines
     $.get("/api/getsaved").then(function(data) {
-    // empty the array
-    savedArticles = [];
-    // set the array to the returned data
-    savedArticles = data;
       // If there are articles render them to the page
       if (data && data.length) {
         // call the render function
@@ -127,8 +122,9 @@ function getSavedArticles() {
         $(".articles").empty().append("You have no saved articles");
       }
     });
-  }
+  };
 
+// function for rendering saved articles
 function renderSavedArticles(data) {
     // empty the container
     $(".articles").empty();
@@ -164,6 +160,7 @@ function renderSavedArticles(data) {
     }
 }
 
+// function for saving an article
 function saveArticle() {
     // set a variable for the article Id
     let articleId = $(this).attr("data-id");
@@ -182,136 +179,97 @@ function saveArticle() {
     });
   }
 
-  function deleteSavedArticle() {
+function deleteSavedArticle() {
     // set a variable for the article Id
     let articleId = $(this).attr("data-id");
     // Remove card from page
     $(this).parents(".card").remove();
     // Update an existing record in the db
     $.ajax({
-      method: "POST",
-      url: "/api/delete/"+articleId,
-      data: articleId
-    }).then(function(data) {
-      // If the data was saved successfully
-      if (data.saved) {
-        console.log("saved")
-      }
+        method: "POST",
+        url: "/api/delete/"+articleId,
+        data: articleId
+        }).then(function(data) {
+        // If the data was saved successfully
+        if (data.saved) {
+            console.log("saved")
+        }
     });
-  }
+};
 
-  function showNotes(articleId) {
-      console.log(articleId);
-    // This function handles opening the notes modal and displaying our notes
-    // We grab the id of the article to get notes for from the card element the delete button sits inside
-    // var articleId = $(this).attr("data-id");
-
+// This function handles opening the notes modal and displaying our notes
+function showNotes(articleId) {
     // Grab any notes with this headline/article id
     $.get("/api/notes/" + articleId).then(function(data) {
-        console.log(data);
-        console.log("DATA LENGTH", data.length);
-        // debugger;
+        // set an empty array to hold notes we want to display
         let notesToRender = [];
+        // create a current note variable
         let currentNote;
-        if (data.length === 0) {
-            currentNote = $("<li class='list-group-item'>No notes for this article yet.</li>");
+        // check to see if there are any notes
+        if (data[0].note.length === 0) {
+            // if not display a 'no notes' message
+            currentNote = $("<li class='list-group-item notes-list'>No notes for this article yet.</li>");
             notesToRender.push(currentNote);
         } else {
-          // If we do have notes, go through each one
-          for (var i = 0; i < data.length; i++) {
+            // If we do have notes, go through each one
+            for (var i = 0; i < data[0].note.length; i++) {
             // Constructs an li element to contain our noteText and a delete button
+            let deleteNoteBtn = ($("<button class='btn btn-danger delete-note'>x</button>"));
+            // add note id to the delete button
+            deleteNoteBtn.attr("data-note", data[0].note[i]._id)
+            // create the current note
             currentNote = $("<li class='list-group-item note'>")
-              .text(data[i].body)
-              .append($("<button class='btn btn-danger note-delete'>x</button>"));
-            // Store the note id on the delete button for easy access when trying to delete
-            currentNote.children("button").data("_id", data[i]._id);
+                .text(data[0].note[i].note)
+                .append(deleteNoteBtn);
             // Adding our currentNote to the notesToRender array
             notesToRender.push(currentNote);
-          }
-        }
-        // Now append the notesToRender to the note-container inside the note modal
-        $(".results").append(notesToRender);
+            };
+        };
+        // append the notesToRender to the note-container inside the note modal
+        $(".results").append(notesToRender);  
 
-        //Click to save note
-    $(document).on("click", ".save-note", saveNote);
-
-        
-        
-    //   // Constructing our initial HTML to add to the notes modal
-    // //   let modalText = $("#note").val();
-    //   var modalText = $("<div class='container-fluid text-center'>").append(
-    //     $("<h4>").text("Notes For Article: " + articleId),
-    //     $("<hr>"),
-    //     $("<ul class='list-group note-container'>"),
-    //     $("<textarea placeholder='New Note' rows='4' cols='60'>"),
-    //     $("<button class='btn btn-success save'>Save Note</button>")
-    //   );
-    // //   Adding the formatted HTML to the note modal
-    //   $(".btn.save-note").attr(modalText);
-    //   var noteData = {
-    //     _id: articleId,
-    //     notes: data || []
-    //   };
-    //   // Adding some information about the article and article notes to the save button for easy access
-    //   // When trying to add a new note
-    //   $(".btn.save-note").attr("id", noteData);
-    //   // renderNotesList will populate the actual note HTML inside of the modal we just created/opened
-    //   renderNotesList(noteData);
+        // click to delete a note
+        $(".delete-note").on("click", function() {
+            var noteId = $(this).attr("data-note");
+  
+            $.ajax({
+                method: "DELETE",
+                url: "/notes/delete/" + noteId
+            }).done(function(data) {
+                console.log(data)
+                $(".modal").modal("hide");
+                // window.location = "/saved"
+            })
+        });
     });
-  }
+};
 
-//   function renderNotesList(data) {
-//       console.log(data);
-//     // This function handles rendering note list items to our notes modal
-//     // Setting up an array of notes to render after finished
-//     // Also setting up a currentNote variable to temporarily store each note
-//     var notesToRender = [];
-//     var currentNote;
-//     if (!data.notes.length) {
-//       // If we have no notes, just display a message explaining this
-//       currentNote = $("<li class='list-group-item'>No notes for this article yet.</li>");
-//       notesToRender.push(currentNote);
-//     } else {
-//       // If we do have notes, go through each one
-//       for (var i = 0; i < data.notes.length; i++) {
-//         // Constructs an li element to contain our noteText and a delete button
-//         currentNote = $("<li class='list-group-item note'>")
-//           .text(data.notes[i].noteText)
-//           .append($("<button class='btn btn-danger note-delete'>x</button>"));
-//         // Store the note id on the delete button for easy access when trying to delete
-//         currentNote.children("button").data("_id", data.notes[i]._id);
-//         // Adding our currentNote to the notesToRender array
-//         notesToRender.push(currentNote);
-//       }
-//     }
-//     // Now append the notesToRender to the note-container inside the note modal
-//     $("#results").append(notesToRender);
-//   }
-
-  function saveNote() {
-    // This function handles what happens when a user tries to save a new note for an article
-    // Setting a variable to hold some formatted data about our note,
-    // grabbing the note typed into the input box
-    var noteData;
+  // Function for creating and saving notes
+function saveNote() {
+    // setting a variable for the article Id
     let articleId = $(this).attr("data-id");
-    var newNote = $("textarea").val().trim();
-    console.log(articleId);
-    console.log(newNote);
-    // debugger;
-    // If we actually have data typed into the note input field, format it
-    // and post it to the "/api/notes" route and send the formatted noteData as well
+    // variable for the entered note
+    let newNote = $("textarea").val().trim();
+    // if we have a note
     if (newNote) {
-      noteData = { _id: articleId, body: newNote };
-      $.post("/api/savenotes/"+articleId, noteData).then(function() {
-        // When complete, clear the divs and close the modal
-        $("textarea").empty();
-        $(".note").empty();
-        // $(".modal-title").empty();
-        // $(".results").empty();
-        $(".modal").modal("hide");
-      });
-    }
-  }
-
-
+        // send it to the servere
+        $.ajax({
+            method: "POST",
+            url: "/api/savenotes/",
+            data: {
+                newNote, 
+                articleId
+            } 
+            }).then(function(data) {
+                // If the data was saved successfully
+                if (data.saved) {
+                console.log("saved")
+                };
+                // When complete, clear the divs and close the modal
+                $(".note").empty();
+                // hide the modal
+                $(".modal").modal("hide");
+            });
+        };
+    };
 });

@@ -41,7 +41,7 @@ app.get("/style.css", function(req, res) {
   res.sendFile(path.join(__dirname, "./public/style.css"));
 });
 
-// Scrape data from one site and place it into the mongodb db
+// path for scraping
 app.get("/api/scrape", function(req, res) {
   // create an object for the cheerio stories
   let storiesObject = {};
@@ -108,6 +108,7 @@ app.get("/api/getsaved/", function(req, res) {
   // only get ones whose saved status is true
   db.Article
     .find({saved: true})
+    // .populate('note') // TODO
     .then(function(dbArticle) {
       res.json(dbArticle);
     })
@@ -134,7 +135,7 @@ app.get("/articles/:id", function(req, res) {
 
   db.Article
     .findOne({ _id: req.params.id })
-    .populate("note")
+    .populate("notes")
     .then(function(dbArticle) {
       res.json(dbArticle);
     })
@@ -144,18 +145,21 @@ app.get("/articles/:id", function(req, res) {
 });
 
 // Route for saving/updating an Article's associated Note
-app.post("/api/savenotes/:id", function(req, res) {
+app.post("/api/savenotes/", function(req, res) {
+  console.log("REQ BODY", req.body)
 
-  db.Note
-    .create(req.body)
+  const note = req.body.newNote;
+  const id = req.body.articleId;
+
+  db.Note.create({note})
     .then(function(dbNote) {
-      return db.Article.insert(
-        { 
-          _id: mongojs.ObjectId(req.params.id) 
-        }, 
-        { 
-          note: dbNote._id 
-        }, 
+      // If a Note was created successfully, find one User (there's only one) and push the new Note's _id to the User's `notes` array
+      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
+      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+      return db.Article.findOneAndUpdate(
+        {_id: mongoose.Types.ObjectId(id)}, 
+        { $push: { note: dbNote._id } }, 
+        { new: true }
       );
     })
     .then(function(dbArticle) {
@@ -169,16 +173,26 @@ app.post("/api/savenotes/:id", function(req, res) {
 // Retrieve appropriate notes from mongo
 app.get("/api/notes/:id", function(req, res) {
   // Find all notes in the notes collection
-  db.Note.find({ _id: req.params.id }, function(error, found) {
-    console.log(found);
+  db.Article.find({ _id: req.params.id })
+  .populate("note")
+  .then(function(data) {
+    console.log(data);
+    // If able to successfully find and associate all Users and Notes, send them back to the client
+    res.json(data);
+  })
+  .catch(function(err) {
+    // If an error occurs, send it back to the client
+    res.json(err);
+  });
+});
+
+app.delete("/notes/delete/:id", function(req, res) {
+  // Use the note id to find and delete it
+  db.Note.findOneAndRemove({ "_id": req.params.id }, function(err) {
     // Log any errors
-    if (error) {
-      console.log(error);
-    }
-    else {
-      // Otherwise, send json of the notes back to user
-      // This will fire off the success function of the ajax request
-      res.json(found);
+    if (err) {
+      console.log(err);
+      res.send(err);
     }
   });
 });
