@@ -6,6 +6,8 @@ let axios = require("axios");
 let cheerio = require("cheerio");
 let mongojs = require("mongojs")
 
+let MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoScraper";
+
 // set port
 let PORT = 3000;
 
