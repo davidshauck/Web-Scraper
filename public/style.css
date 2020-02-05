@@ -52,7 +52,7 @@ textarea {
     float: right;
 }
 
-.notes-list {
+.notes-list, .note {
     margin-bottom: 10px;
 }
 
